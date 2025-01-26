@@ -9,7 +9,7 @@ export interface ICustomer {
   contact: IContact,  
   shippingIds: string[], 
   orderIds: string[],  
- 
+  createdAt?: Date;
 }
 
 
@@ -19,14 +19,16 @@ export class Customer extends EntityBase<Customer, ICustomer> {
   contact: Contact
   shippingIds: string[]
   orderIds: string[]
+  createdAt?: Date;
 
   constructor(customer: ICustomer) {
-    super();
+    super(customer.id);
     this.cognitoId = customer.cognitoId;
     this.person = Person.fromJSON(customer.person)  ;
     this.contact = Contact.fromJSON(customer.contact);
     this.shippingIds = customer.shippingIds;
     this.orderIds = customer.orderIds;
+    this.createdAt = customer.createdAt ?? new Date();
   }
 
   
@@ -36,7 +38,8 @@ export class Customer extends EntityBase<Customer, ICustomer> {
       person: this.person.toJSON(),
       contact: this.contact.toJSON(),
       shippingIds: this.shippingIds,
-      orderIds: this.orderIds
+      orderIds: this.orderIds,
+      createdAt: this.createdAt
     };
   }
 

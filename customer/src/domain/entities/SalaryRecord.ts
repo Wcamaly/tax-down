@@ -11,12 +11,13 @@ export enum RecordType {
 }
 
 export interface ISalaryRecord {
+  id?:string
   customerId: string;
   amount: number;
   currency: Currency;
   type: RecordType;
   description: string;
-  createdAt: Date;
+  createdAt?: Date;
 }
 
 export class SalaryRecord extends EntityBase<SalaryRecord, ISalaryRecord> {
@@ -26,21 +27,22 @@ export class SalaryRecord extends EntityBase<SalaryRecord, ISalaryRecord> {
   currency: Currency; 
   type: RecordType;
   description: string;
-  createdAt: Date;
+  createdAt?: Date;
      constructor(
         payload: ISalaryRecord
     ) {
-        super();
+        super(payload.id);
         this.customerId = payload.customerId;
         this.amount = payload.amount;
         this.currency = payload.currency;
         this.type = payload.type;
         this.description = payload.description;
-        this.createdAt = payload.createdAt;
+        this.createdAt = payload.createdAt ?? new Date();
     }
 
     toJSON(): ISalaryRecord {
         return {
+            id: this.id,
             customerId: this.customerId,
             amount: this.amount,
             currency: this.currency,

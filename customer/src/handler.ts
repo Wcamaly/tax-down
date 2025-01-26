@@ -18,13 +18,11 @@ const dynamoDbInstance = new DynamoDb();
 
 const instances = new Instances(serverInstance, dynamoDbInstance);
 
-instances.initializeDynamoDb();
-instances.initializeRepositories();
-instances.initializeUseCases();
-instances.initializeDelivers();
-
-serverInstance.registerRoutes(routes);
-
+instances.initializeDynamoDb().then(() => {
+  instances.initializeRepositories();
+  instances.initializeUseCases();
+  instances.initializeDelivers();
+});
 const proxy = awsLambdaFastify(serverInstance.getServer());
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent, context: Context) => {
