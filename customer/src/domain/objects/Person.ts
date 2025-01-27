@@ -1,3 +1,5 @@
+import { BaseObject } from "./BaseObject";
+
 export interface IPerson {
   firstName: string;
   lastName: string;

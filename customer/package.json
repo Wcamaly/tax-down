@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
@@ -24,7 +24,10 @@
     "@aws-sdk/client-dynamodb": "^3.734.0",
     "@aws-sdk/lib-dynamodb": "^3.734.0",
     "@fastify/aws-lambda": "^5.1.1",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
     "fastify": "^5.2.1",
+    "typescript-class-validator": "^0.0.6",
     "uuid": "^11.0.5"
   }
 }

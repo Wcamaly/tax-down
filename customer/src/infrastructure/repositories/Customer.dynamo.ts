@@ -47,7 +47,7 @@ export class CustomerRepository implements ICustomerRepository {
         cognitoId: { S: customer.cognitoId },
         createdAt: { S: customer.createdAt?.toISOString() },
         person : { M: customer.person.toJSON()},
-        contact : { M: customer.contact.toJSON()},
+        contact : { M: customer.contact?.toJSON()},
         shippingIds: { SS: customer.shippingIds},
         orderIds: { SS: customer.orderIds}
       }

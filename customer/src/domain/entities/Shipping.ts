@@ -8,7 +8,7 @@ export interface IShipping {
   state: string,
   country: string,
   postalCode: string,
-  isDefault: boolean
+  isDefault?: boolean
 }
 
 export class Shipping extends EntityBase<Shipping, IShipping> {
@@ -29,7 +29,7 @@ export class Shipping extends EntityBase<Shipping, IShipping> {
     this.state = payload.state
     this.country = payload.country
     this.postalCode = payload.postalCode
-    this.isDefault = payload.isDefault
+    this.isDefault = payload.isDefault ?? false
   }
 
 

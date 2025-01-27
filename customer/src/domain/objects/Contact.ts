@@ -1,3 +1,5 @@
+import { BaseObject } from "./BaseObject";
+
 export interface IPhone {
   number: string;
   countryCode: string;

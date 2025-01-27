@@ -13,7 +13,7 @@ export enum RecordType {
 export interface ISalaryRecord {
   id?:string
   customerId: string;
-  amount: number;
+  amount?: number;
   currency: Currency;
   type: RecordType;
   description: string;
@@ -32,8 +32,16 @@ export class SalaryRecord extends EntityBase<SalaryRecord, ISalaryRecord> {
         payload: ISalaryRecord
     ) {
         super(payload.id);
+        if (!payload.customerId) {
+            throw new Error('SalaryRecord must have a customerId');
+        }
+
+        if (!payload.currency) {
+            throw new Error('SalaryRecord must have a currency');
+        }
+
         this.customerId = payload.customerId;
-        this.amount = payload.amount;
+        this.amount = payload.amount ?? 0;
         this.currency = payload.currency;
         this.type = payload.type;
         this.description = payload.description;

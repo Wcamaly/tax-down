@@ -1,4 +1,4 @@
-abstract class BaseObject<R> {
+export abstract class BaseObject<R> {
   abstract toJSON(): R;
  /*  static fromJSON<W, T extends BaseObject<W>>(this: new (json: W) => T, json: W): T {
     return new this(json);
