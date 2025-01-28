@@ -1,0 +1,64 @@
+service: customer-service
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  environment:
+    DYNAMODB_TABLE: CustomersTable
+    COGNITO_USER_POOL_ID: us-east-1_local_123456
+    COGNITO_APP_CLIENT_ID: local_client_789
+
+plugins:
+  - serverless-offline
+  - serverless-dynamodb-local
+
+functions:
+  Customer:
+    handler: src/handler.handler
+    events:
+      - http:
+          path: health
+          method: get
+      - http: 
+          path: /customer/:customerId
+          method: get
+      - http:
+          path: /customer/:customerId/credit
+          method: get
+      - http:
+          path: /customer/:customerId/shipping
+          method: get
+      - http:  
+          path: /customer
+          method: post
+      - http:  
+          path: /customer/:customerId/shipping
+          method: post
+      - http:  
+          path: /customer/:customerId/salary-record
+          method: post
+     
+resources:
+  Resources:
+    CustomersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: CustomersTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    CognitoAuthorizer:
+      Type: AWS::ApiGateway::Authorizer
+      Properties:
+        Name: CognitoAuthorizer
+        Type: COGNITO_USER_POOLS
+        IdentitySource: method.request.header.Authorization
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ProviderARNs:
+          - !Sub arn:aws:cognito-idp:us-east-1:000000000000:userpool/${COGNITO_USER_POOL_ID}

@@ -8,7 +8,7 @@ export class AvailableCreditUsecase {
     private readonly salaryBalanceRepository: ISalaryBalanceRepository,
   ) {}
 
-  async getAvailableCredit(cognitoId: string): Promise<number> {
+  async execute(cognitoId: string): Promise<number> {
     const customer = await this.customerRepository.getCustomer(cognitoId);
     if (!customer) {
       throw new Error('Customer not found');

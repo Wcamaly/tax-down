@@ -1,0 +1,115 @@
+{
+  "/app": {
+    "versionSfCore": null,
+    "versionFramework": "4.4.19",
+    "isWithinCompose": false,
+    "isCompose": false,
+    "composeOrgName": null,
+    "composeServiceName": null,
+    "servicePath": "/app",
+    "serviceConfigFileName": "serverless.yml",
+    "service": {
+      "service": "customer-service",
+      "provider": {
+        "name": "aws",
+        "runtime": "nodejs18.x",
+        "environment": {
+          "DYNAMODB_TABLE": "CustomersTable",
+          "COGNITO_USER_POOL_ID": "us-east-1_local_123456",
+          "COGNITO_APP_CLIENT_ID": "local_client_789"
+        }
+      },
+      "plugins": [
+        "serverless-offline",
+        "serverless-dynamodb-local",
+        "serverless-offline-sns"
+      ],
+      "functions": {
+        "getCustomer": {
+          "handler": "src/handlers.getCustomer",
+          "events": [
+            {
+              "http": {
+                "path": "customers/{id}",
+                "method": "get",
+                "authorizer": {
+                  "type": "COGNITO_USER_POOLS",
+                  "authorizerId": {
+                    "Ref": "CognitoAuthorizer"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "createCustomer": {
+          "handler": "src/handlers.createCustomer",
+          "events": [
+            {
+              "http": {
+                "path": "customers",
+                "method": "post"
+              }
+            }
+          ]
+        }
+      },
+      "resources": {
+        "Resources": {
+          "CustomersTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "CustomersTable",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "id",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "id",
+                  "KeyType": "HASH"
+                }
+              ],
+              "BillingMode": "PAY_PER_REQUEST"
+            }
+          },
+          "CognitoAuthorizer": {
+            "Type": "AWS::ApiGateway::Authorizer",
+            "Properties": {
+              "Name": "CognitoAuthorizer",
+              "Type": "COGNITO_USER_POOLS",
+              "IdentitySource": "method.request.header.Authorization",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ProviderARNs": [
+                {
+                  "Fn::Sub": "arn:aws:cognito-idp:us-east-1:000000000000:userpool/${COGNITO_USER_POOL_ID}"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "serviceRawFile": "service: customer-service\n\nprovider:\n  name: aws\n  runtime: nodejs18.x\n  environment:\n    DYNAMODB_TABLE: CustomersTable\n    COGNITO_USER_POOL_ID: us-east-1_local_123456\n    COGNITO_APP_CLIENT_ID: local_client_789\n\nplugins:\n  - serverless-offline\n  - serverless-dynamodb-local\n  - serverless-offline-sns\n\nfunctions:\n  getCustomer:\n    handler: src/handlers.getCustomer\n    events:\n      - http:\n          path: customers/{id}\n          method: get\n          authorizer:\n            type: COGNITO_USER_POOLS\n            authorizerId:\n              Ref: CognitoAuthorizer\n\n  createCustomer:\n    handler: src/handlers.createCustomer\n    events:\n      - http:\n          path: customers\n          method: post\n\nresources:\n  Resources:\n    CustomersTable:\n      Type: AWS::DynamoDB::Table\n      Properties:\n        TableName: CustomersTable\n        AttributeDefinitions:\n          - AttributeName: id\n            AttributeType: S\n        KeySchema:\n          - AttributeName: id\n            KeyType: HASH\n        BillingMode: PAY_PER_REQUEST\n\n    CognitoAuthorizer:\n      Type: AWS::ApiGateway::Authorizer\n      Properties:\n        Name: CognitoAuthorizer\n        Type: COGNITO_USER_POOLS\n        IdentitySource: method.request.header.Authorization\n        RestApiId:\n          Ref: ApiGatewayRestApi\n        ProviderARNs:\n          - !Sub arn:aws:cognito-idp:us-east-1:000000000000:userpool/${COGNITO_USER_POOL_ID}",
+    "command": [
+      "offline",
+      "start"
+    ],
+    "options": {},
+    "error": {
+      "message": "You must sign in or use a license key with Serverless Framework V.4 and later versions. Please use \"serverless login\".",
+      "stack": "Error: You must sign in or use a license key with Serverless Framework V.4 and later versions. Please use \"serverless login\".\n    at Authentication.getAuthenticatedData (file:///root/.serverless/releases/4.4.19/package/dist/sf-core.js:686:10803)\n    at async Authentication.resolverAuthenticate (file:///root/.serverless/releases/4.4.19/package/dist/sf-core.js:688:20566)\n    at async _Meta.authenticate (file:///root/.serverless/releases/4.4.19/package/dist/sf-core.js:696:12154)\n    at async _Meta.authenticateAndResolve (file:///root/.serverless/releases/4.4.19/package/dist/sf-core.js:696:11738)\n    at async route (file:///root/.serverless/releases/4.4.19/package/dist/sf-core.js:1010:14685)\n    at async Object.run2 [as run] (file:///root/.serverless/releases/4.4.19/package/dist/sf-core.js:1010:15173)\n    at async run3 (file:///root/.serverless/releases/4.4.19/package/dist/sf-core.js:1010:16435)"
+    },
+    "machineId": "f7eab6007dd5c2fa10aac4ad745335ad",
+    "stage": "dev",
+    "serviceProviderAwsCfStackId": null,
+    "serviceProviderAwsCfStackCreated": null,
+    "serviceProviderAwsCfStackUpdated": null,
+    "serviceProviderAwsCfStackStatus": null,
+    "serviceProviderAwsCfStackOutputs": null
+  }
+}

@@ -25,7 +25,7 @@ describe('AvailableCreditUsecase', () => {
 
     const usecase = new AvailableCreditUsecase(customerRepository, salaryBalanceRepository);
 
-    const result = await usecase.getAvailableCredit('cognito-123');
+    const result = await usecase.execute('cognito-123');
 
     expect(customerRepository.getCustomer).toHaveBeenCalledWith('cognito-123');
     expect(salaryBalanceRepository.getSalaryBalance).toHaveBeenCalledWith('customer-123');
@@ -50,7 +50,7 @@ describe('AvailableCreditUsecase', () => {
 
     const usecase = new AvailableCreditUsecase(customerRepository, salaryBalanceRepository);
 
-    await expect(usecase.getAvailableCredit('cognito-123'))
+    await expect(usecase.execute('cognito-123'))
       .rejects
       .toThrow('Customer not found');
 
