@@ -117,6 +117,7 @@ src/
 
 ### Video Example
 
-![Video Example](https://github.com/Wcamaly/tax-down/blob/main/doc/example.mp4)
+[Video Example](https://github.com/Wcamaly/tax-down/blob/main/doc/example.mp4)
+
 
 
