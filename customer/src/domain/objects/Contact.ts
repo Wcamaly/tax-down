@@ -55,7 +55,7 @@ export class Contact extends BaseObject<IContact> {
   toJSON(): IContact {
     return {
       mainEmail: this.mainEmail,
-      phones: this.phones.map(p => p.toJSON()),
+      phones: this.phones && this.phones.length > 0 ? this.phones.map(p => p.toJSON()) : undefined,
       secondaryEmail: this.secondaryEmail
     }
   }

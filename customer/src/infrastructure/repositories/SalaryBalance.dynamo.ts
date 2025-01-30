@@ -3,36 +3,30 @@ import { SalaryBalance } from "../../domain/entities/SalaryBalance";
 import { ISalaryBalanceRepository } from "../../domain/repositories/ISalaryBalance.repository";
 
 import { CreateTableCommandInput, QueryCommand } from "@aws-sdk/client-dynamodb";
+import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 
 export class SalaryBalanceRepository implements ISalaryBalanceRepository {
   static TABE_NAME = "salary_balance";
   static INDEX = {
-    CUSTOMER_INDEX: "CustomerIndex"
+    SALARY_BALANCE_INDEX: "SalaryBalanceIndex"
   }
 
   constructor(private readonly dynamoDb: DynamoDBDocumentClient) {}
   async createSalaryBalance(salaryBalance: SalaryBalance): Promise<SalaryBalance> {
     const command = new PutCommand({
       TableName: SalaryBalanceRepository.TABE_NAME,
-      Item: {
-        id: { S: salaryBalance.id },
-        customerId: { S: salaryBalance.customerId },
-        balance: { N: salaryBalance.balance.toString() },
-        currency: { S: salaryBalance.currency },
-        lastUpdated: { S: salaryBalance.lastUpdated.toISOString() },
-        lastRecordId: { S: salaryBalance.lastRecordId },
-        createdAt: { S: salaryBalance.createdAt?.toISOString() }
-      }
+      Item:  salaryBalance.toJSON()
     })
+  
     await this.dynamoDb.send(command)
     return salaryBalance;
 
   }
-  async deleteSalaryBalance(customerId: string): Promise<void> {
+  async deleteSalaryBalance(salaryBalanceId: string): Promise<void> {
     const command = new DeleteCommand({
       TableName: SalaryBalanceRepository.TABE_NAME,
       Key: {
-        id: { S: customerId }
+        id: salaryBalanceId 
       }
     })
     await this.dynamoDb.send(command)
@@ -41,26 +35,18 @@ export class SalaryBalanceRepository implements ISalaryBalanceRepository {
     const command = new QueryCommand(
       {
         TableName: SalaryBalanceRepository.TABE_NAME,
-        IndexName: SalaryBalanceRepository.INDEX.CUSTOMER_INDEX,
+        IndexName: SalaryBalanceRepository.INDEX.SALARY_BALANCE_INDEX,
         KeyConditionExpression: "customerId = :customerId",
         ExpressionAttributeValues: {
           ":customerId": { S: customerId }
         },
-        ConsistentRead: true
+        ConsistentRead: false
       })
       const res = await this.dynamoDb.send(command)
       if (!res.Items || res.Items.length === 0) {
         throw new Error("Salary balance not found");
       }
-      return SalaryBalance.fromJSON({
-        id: res.Items[0].id.S,
-        customerId: res.Items[0].customerId.S,
-        balance: res.Items[0].balance.N,
-        currency: res.Items[0].currency.S,
-        lastUpdated: res.Items[0].lastUpdated.S,
-        lastRecordId: res.Items[0].lastRecordId.S,
-        createdAt: res.Items[0].createdAt.S
-      });
+      return SalaryBalance.fromJSON(unmarshall(res.Items[0]))
   }
   async updateSalaryBalance(salaryBalance: SalaryBalance): Promise<SalaryBalance> {
     // TODO validate complete execution
@@ -68,16 +54,12 @@ export class SalaryBalanceRepository implements ISalaryBalanceRepository {
     await this.createSalaryBalance(salaryBalance);
     return salaryBalance;
   }
-
-  
-
    static getCustomerDefinition() : CreateTableCommandInput {
       return {
         TableName : SalaryBalanceRepository.TABE_NAME,
         AttributeDefinitions: [
           { AttributeName: "id", AttributeType: "S" },
           { AttributeName: "customerId", AttributeType: "S" },
-          { AttributeName: "recordId", AttributeType: "S" },
           { AttributeName: "createdAt", AttributeType: "S" }
         ],
         KeySchema: [
@@ -86,7 +68,7 @@ export class SalaryBalanceRepository implements ISalaryBalanceRepository {
 
         GlobalSecondaryIndexes: [
           {
-            IndexName: "CustomerIndex",
+            IndexName: SalaryBalanceRepository.INDEX.SALARY_BALANCE_INDEX,
             KeySchema: [
               { AttributeName: "customerId", KeyType: "HASH" },
               { AttributeName: "createdAt", KeyType: "RANGE" }

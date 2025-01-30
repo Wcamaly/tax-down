@@ -3,28 +3,34 @@ import { Shipping } from "../../domain/entities/Shipping";
 import { IShippingRepository } from "../../domain/repositories/IShipping.repository";
 
 import { CreateTableCommandInput, QueryCommand } from "@aws-sdk/client-dynamodb";
+import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 
 export class ShippingRepository implements IShippingRepository {
   static TABE_NAME = "shipping";
   
+  static INDEX = {
+    SHIPPING_DEFAULT_INDEX: "ShippingDefaultIndex"
+  }
   constructor(private readonly dynamoDb: DynamoDBDocumentClient) {
   }
   
-  getShippings(customerId: string): Promise<Shipping[]> {
-    throw new Error("Method not implemented.");
+  async getShippings(customerId: string): Promise<Shipping[]> {
+    const command = new QueryCommand({
+      TableName: ShippingRepository.TABE_NAME,
+      IndexName: ShippingRepository.INDEX.SHIPPING_DEFAULT_INDEX,
+      KeyConditionExpression: "customerId = :customerId",
+      ExpressionAttributeValues: {
+        ":customerId": { S: customerId }
+      },
+      ConsistentRead: false
+    })
+    const res = await this.dynamoDb.send(command)
+    return res.Items?.map(item => Shipping.fromJSON(unmarshall(item))) || []
   }
   async createShipping(shipping: Shipping): Promise<Shipping> {
       const command = new PutCommand({
         TableName: ShippingRepository.TABE_NAME,
-        Item: {
-          id: { S: shipping.id },
-          addressLine: { S: shipping.addressLine },
-          city: { S: shipping.city },
-          state: { S: shipping.state },
-          country: { S: shipping.country },
-          postalCode: { S: shipping.postalCode },
-          isDefault: { N: shipping.isDefault ? "1" : "0" },
-        }
+        Item: shipping.toJSON()
       })
       await this.dynamoDb.send(command)
       return shipping;
@@ -37,7 +43,7 @@ export class ShippingRepository implements IShippingRepository {
     const command = new DeleteCommand({
       TableName: ShippingRepository.TABE_NAME,
       Key: {
-        id: { S: shippingId }
+        id: shippingId 
       }
     })
     await this.dynamoDb.send(command)
@@ -45,30 +51,22 @@ export class ShippingRepository implements IShippingRepository {
   async getShippingDefault(customerId: string): Promise<Shipping | null> {
     const command = new QueryCommand({
       TableName: ShippingRepository.TABE_NAME,
-      IndexName: "CustomerIndexByIsDefault",
+      IndexName: ShippingRepository.INDEX.SHIPPING_DEFAULT_INDEX,
       KeyConditionExpression: "customerId = :customerId and isDefault = :isDefault",
       ExpressionAttributeValues: {
         ":customerId": { S: customerId },
         ":isDefault": { N: "1" }
       },
-      Limit: 1
+      Limit: 1,
+      ConsistentRead: false
     })
     const res = await this.dynamoDb.send(command)
     if (res.Items && res.Items.length > 0) {
-      return Shipping.fromJSON({
-        id: res.Items[0].id.S,
-        addressLine: res.Items[0].addressLine.S,
-        city: res.Items[0].city.S,
-        state: res.Items[0].state.S,
-        country: res.Items[0].country.S,
-        postalCode: res.Items[0].postalCode.S,
-        isDefault: res.Items[0].isDefault.N === "1"
-      });
+      return Shipping.fromJSON(unmarshall(res.Items[0]))
     }
     return null;
 
   }
-
    static getCustomerDefinition() : CreateTableCommandInput {
       return {
         TableName : ShippingRepository.TABE_NAME,
@@ -83,21 +81,13 @@ export class ShippingRepository implements IShippingRepository {
         ],
         GlobalSecondaryIndexes: [
           {
-            IndexName: "CustomerIndexByIsDefault",
+            IndexName: ShippingRepository.INDEX.SHIPPING_DEFAULT_INDEX,
             KeySchema: [
               { AttributeName: "customerId", KeyType: "HASH" },
               { AttributeName: "isDefault", KeyType: "RANGE" }
             ],
             Projection: { ProjectionType: "ALL" }
-          },
-          {
-            IndexName: "CustomerIndexByCreatedAt",
-            KeySchema: [
-              { AttributeName: "customerId", KeyType: "HASH" },
-              { AttributeName: "createdAt", KeyType: "RANGE" }
-            ],
-            Projection: { ProjectionType: "ALL" }
-          },
+          }
         ],
 
         BillingMode: "PAY_PER_REQUEST",

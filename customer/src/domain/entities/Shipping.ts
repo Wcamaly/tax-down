@@ -8,17 +8,17 @@ export interface IShipping {
   state: string,
   country: string,
   postalCode: string,
-  isDefault?: boolean
+  isDefault?: number
 }
 
 export class Shipping extends EntityBase<Shipping, IShipping> {
-  readonly customerId: string;
-  readonly addressLine: string;
-  readonly city: string;
-  readonly state: string;
-  readonly country: string;
-  readonly postalCode: string;
-  readonly isDefault: boolean;
+  customerId: string;
+  addressLine: string;
+  city: string;
+  state: string;
+  country: string;
+  postalCode: string;
+  isDefault: boolean;
   constructor(
       payload : IShipping
   ) {
@@ -29,7 +29,7 @@ export class Shipping extends EntityBase<Shipping, IShipping> {
     this.state = payload.state
     this.country = payload.country
     this.postalCode = payload.postalCode
-    this.isDefault = payload.isDefault ?? false
+    this.isDefault = payload.isDefault ? true : false
   }
 
 
@@ -42,7 +42,7 @@ export class Shipping extends EntityBase<Shipping, IShipping> {
       state: this.state,
       country: this.country,
       postalCode: this.postalCode,
-      isDefault: this.isDefault
+      isDefault: this.isDefault ? 1 : 0
     }
   }
 }

@@ -7,9 +7,9 @@ export interface ICustomer {
   cognitoId: string,  
   person: IPerson, 
   contact?: IContact,  
-  shippingIds: string[], 
+  shippingIds?: string[], 
   orderIds?: string[],  
-  createdAt?: Date;
+  createdAt?: string;
 }
 
 
@@ -29,16 +29,13 @@ export class Customer extends EntityBase<Customer, ICustomer> {
     if (!customer.person) {
       throw new Error('Customer must have a person');
     }
-    if (!customer.shippingIds) {
-      throw new Error('Customer must have a shippingIds');
-    }
 
     this.cognitoId = customer.cognitoId;
     this.person =  Person.fromJSON(customer.person);
     this.contact =  customer.contact ? Contact.fromJSON(customer.contact) : undefined;
-    this.shippingIds = customer.shippingIds;
-    this.orderIds = customer.orderIds ?? [];
-    this.createdAt = customer.createdAt ?? new Date();
+    this.shippingIds = customer.shippingIds || [];
+    this.orderIds = customer.orderIds || [];
+    this.createdAt = customer.createdAt ? new Date(customer.createdAt) : new Date();
   }
 
   
@@ -48,9 +45,9 @@ export class Customer extends EntityBase<Customer, ICustomer> {
       cognitoId: this.cognitoId,
       person: this.person.toJSON(),
       contact: this.contact?.toJSON() || undefined,
-      shippingIds: this.shippingIds,
-      orderIds: this.orderIds,
-      createdAt: this.createdAt
+      shippingIds: this.shippingIds && this.shippingIds.length > 0 ? this.shippingIds : undefined,
+      orderIds: this.orderIds && this.orderIds.length > 0 ? this.orderIds : undefined,
+      createdAt: this.createdAt?.toISOString() || new Date().toISOString()
     };
   }
 

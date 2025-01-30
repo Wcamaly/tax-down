@@ -12,8 +12,3 @@ export class HealthGetDeliver {
     server.get('/health', this.get.bind(this));
   }
 }
-
-/* authorizer:
-type: COGNITO_USER_POOLS
-authorizerId:
-  Ref: CognitoAuthorizer */

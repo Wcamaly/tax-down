@@ -2,41 +2,92 @@ service: customer-service
 
 provider:
   name: aws
-  runtime: nodejs18.x
+  runtime: nodejs20.x
+  timeout: 60
   environment:
+    AWS_ACCESS_KEY_ID: test
+    AWS_SECRET_ACCESS_KEY: test
     DYNAMODB_TABLE: CustomersTable
     COGNITO_USER_POOL_ID: us-east-1_local_123456
     COGNITO_APP_CLIENT_ID: local_client_789
+    DYNAMODB_ENDPOINT: http://dynamodb:8000
+    ENDPOINT_COGNITO: http://localstack:4566
 
 plugins:
   - serverless-offline
   - serverless-dynamodb-local
+  
+custom:
+  serverless-offline:
+    httpPort: 3000
+    host: 0.0.0.0
 
 functions:
   Customer:
     handler: src/handler.handler
+    timeout: 60
     events:
       - http:
           path: health
           method: get
+        
       - http: 
-          path: /customer/:customerId
+          path: /customer/user/{cognitoId}
           method: get
+         
+          request:
+            parameters:
+              paths:
+                cognitoId: true
+      - http: 
+          path: /customer/{customerId}
+          method: get
+         
+          request:
+            parameters:
+              paths:
+                customerId: true
       - http:
-          path: /customer/:customerId/credit
+          path: /customer/{customerId}/credit
           method: get
+          
+          request:
+            parameters:
+              paths:
+                customerId: true
       - http:
-          path: /customer/:customerId/shipping
+          path: /customer/{customerId}/shipping
           method: get
+          
+          request:
+            parameters:
+              paths:
+                customerId: true
       - http:  
           path: /customer
           method: post
+    
       - http:  
-          path: /customer/:customerId/shipping
+          path: /customer/{customerId}/shipping
           method: post
+          request:
+            parameters:
+              paths:
+                customerId: true
       - http:  
-          path: /customer/:customerId/salary-record
+          path: /customer/{customerId}/salary-record
           method: post
+          request:
+            parameters:
+              paths:
+                customerId: true
+      - http: 
+          path: /customer/{customerId}
+          method: delete
+          request:
+            parameters:
+              paths:
+                customerId: true
      
 resources:
   Resources:

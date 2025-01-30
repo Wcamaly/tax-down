@@ -15,9 +15,9 @@ export interface ISalaryRecord {
   customerId: string;
   amount?: number;
   currency: Currency;
-  type: RecordType;
+  type: string;
   description: string;
-  createdAt?: Date;
+  createdAt?: string;
 }
 
 export class SalaryRecord extends EntityBase<SalaryRecord, ISalaryRecord> {
@@ -43,9 +43,9 @@ export class SalaryRecord extends EntityBase<SalaryRecord, ISalaryRecord> {
         this.customerId = payload.customerId;
         this.amount = payload.amount ?? 0;
         this.currency = payload.currency;
-        this.type = payload.type;
+        this.type = RecordType[payload.type as keyof typeof RecordType];
         this.description = payload.description;
-        this.createdAt = payload.createdAt ?? new Date();
+        this.createdAt = payload.createdAt ? new Date(payload.createdAt) : new Date();
     }
 
     toJSON(): ISalaryRecord {
@@ -54,9 +54,9 @@ export class SalaryRecord extends EntityBase<SalaryRecord, ISalaryRecord> {
             customerId: this.customerId,
             amount: this.amount,
             currency: this.currency,
-            type: this.type,
+            type: this.type.valueOf(),
             description: this.description,
-            createdAt: this.createdAt
+            createdAt: this.createdAt?.toISOString() ?? new Date().toISOString()
         }
     }
 }

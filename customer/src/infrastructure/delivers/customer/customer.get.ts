@@ -3,6 +3,7 @@ import { AvailableCreditUsecase } from "../../../application/customer/AvailableC
 import { GetCustomerUsecase } from "../../../application/customer/GetCustomer";
 import { GetShippingUsecase } from "../../../application/customer/GetShipping";
 
+
 export class CustomerGetDeliver {
   constructor(
     private readonly getCustomerUsecase: GetCustomerUsecase,
@@ -10,28 +11,35 @@ export class CustomerGetDeliver {
     private readonly getShippingUsecase: GetShippingUsecase,
   ) {}
 
-  private async getCustomer(req: FastifyRequest, res: FastifyReply): Promise<void> {
+  private async getCustomerByCognitoId(req: FastifyRequest, res: FastifyReply): Promise<void> {
+    const { cognitoId } = req.params as { cognitoId: string };
+    const customer = await this.getCustomerUsecase.execute(cognitoId);
+    res.send(customer || { message: 'Customer exists' });
+  }
+
+  private async getCustomerById(req: FastifyRequest, res: FastifyReply): Promise<void> {
     const { customerId } = req.params as { customerId: string };
     const customer = await this.getCustomerUsecase.execute(customerId);
-    res.status(200).send(customer);
+    res.send(customer);
   }
 
   private async getAvailableCredit(req: FastifyRequest, res: FastifyReply): Promise<void> {
     const { customerId } = req.params as { customerId: string };
     const credit = await this.avaliableCreditUsecase.execute(customerId);
-    res.status(200).send(credit);
+    res.send(credit);
   }
 
   private async getShipping(req: FastifyRequest, res: FastifyReply): Promise<void> {
     const { customerId } = req.params as { customerId: string };
     const shipping = await this.getShippingUsecase.execute(customerId);
-    res.status(200).send(shipping);
+    res.send(shipping);
   }
 
   public async registerRoutes(server: FastifyInstance): Promise<void> {
-    server.get('/customer/:customerId', this.getCustomer.bind(this));
-    server.get('/customer/:customerId/credit', this.getAvailableCredit.bind(this));
-    server.get('/customer/:customerId/shipping', this.getShipping.bind(this));
+    server.get('/customer/:customerId' , this.getCustomerById.bind(this));
+    server.get('/customer/user/:cognitoId', this.getCustomerByCognitoId.bind(this));
+    server.get('/customer/:customerId/credit' ,this.getAvailableCredit.bind(this));
+    server.get('/customer/:customerId/shipping' ,this.getShipping.bind(this));
   }
 
 }

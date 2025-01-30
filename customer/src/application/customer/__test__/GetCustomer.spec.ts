@@ -3,6 +3,13 @@
 import { GetCustomerUsecase } from "../GetCustomer";
 
 describe('GetCustomerUsecase', () => {
+  const mockCustomerRepository = {
+    getCustomer: jest.fn(),
+    createCustomer: jest.fn(),
+    updateCustomer: jest.fn(),
+    deleteCustomer: jest.fn(),
+    getCustomerByCognitoId: jest.fn()
+  };
 
   // Returns customer data when valid cognitoId is provided
   it('should return customer data when valid cognitoId is provided', async () => {
@@ -12,12 +19,7 @@ describe('GetCustomerUsecase', () => {
       name: 'John Doe'
     };
 
-    const mockCustomerRepository = {
-      getCustomer: jest.fn().mockResolvedValue(mockCustomer),
-      createCustomer: jest.fn(),
-      updateCustomer: jest.fn(),
-      deleteCustomer: jest.fn()
-    };
+    mockCustomerRepository.getCustomer.mockResolvedValue(mockCustomer);
 
     const getCustomerUsecase = new GetCustomerUsecase(mockCustomerRepository);
 
@@ -29,12 +31,7 @@ describe('GetCustomerUsecase', () => {
 
   // Handle empty cognitoId string
   it('should return null when empty cognitoId is provided', async () => {
-    const mockCustomerRepository = {
-      getCustomer: jest.fn().mockResolvedValue(null),
-      createCustomer: jest.fn(),
-      updateCustomer: jest.fn(),
-      deleteCustomer: jest.fn()
-    };
+    mockCustomerRepository.getCustomer.mockResolvedValue(null);
 
     const getCustomerUsecase = new GetCustomerUsecase(mockCustomerRepository);
 

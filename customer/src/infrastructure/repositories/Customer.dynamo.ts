@@ -1,21 +1,30 @@
-import { CreateTableCommandInput, DynamoDBClient, QueryCommand } from "@aws-sdk/client-dynamodb";
+import { CreateTableCommandInput,  QueryCommand } from "@aws-sdk/client-dynamodb";
 import { ICustomerRepository } from "../../domain/repositories/ICustomer.repository";
 import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { Customer } from "../../domain/entities/Customer";
+import { unmarshall } from "@aws-sdk/util-dynamodb";
 
 
 export class CustomerRepository implements ICustomerRepository {
 
   static TABE_NAME = "customer";
+  
   static INDEX = {
     COGNITO_INDEX: "CognitoIndex"
   }
   
   constructor(private readonly dynamoDb: DynamoDBDocumentClient) {}
 
-
-
-  async getCustomer(cognitoId: string): Promise<Customer | null> {
+  async getCustomer(customerId: string): Promise<Customer | null> {
+    const command = new GetCommand({
+      TableName: CustomerRepository.TABE_NAME,
+      Key: { id: customerId }
+    });
+    const res = await this.dynamoDb.send(command);
+    return res.Item ? Customer.fromJSON(res.Item) : null;
+  }
+  
+  async getCustomerByCognitoId(cognitoId: string): Promise<Customer | null> {
     const command = new QueryCommand(
       {
         TableName: CustomerRepository.TABE_NAME,
@@ -24,35 +33,25 @@ export class CustomerRepository implements ICustomerRepository {
         ExpressionAttributeValues: {
           ":cognitoId": { S: cognitoId }
         },
-        ConsistentRead: true
+        Limit: 1,
+        ConsistentRead: false
       }
     )
     const res = await this.dynamoDb.send(command)
     if (res.Items && res.Items.length > 0) {
-      return Customer.fromJSON({
-        id: res.Items[0].id.S,
-        cognitoId: res.Items[0].cognitoId.S,
-        name: res.Items[0].name.S,
-        email: res.Items[0].email.S,
-        createdAt: res.Items[0].createdAt.S
-      });
+      const item = unmarshall(res.Items[0]);
+      return Customer.fromJSON(item);
     }
     return null;
   }
   async createCustomer(customer: Customer): Promise<Customer> {
+    
     const command = new PutCommand({
       TableName: CustomerRepository.TABE_NAME,
-      Item: {
-        id: { S: customer.id },
-        cognitoId: { S: customer.cognitoId },
-        createdAt: { S: customer.createdAt?.toISOString() },
-        person : { M: customer.person.toJSON()},
-        contact : { M: customer.contact?.toJSON()},
-        shippingIds: { SS: customer.shippingIds},
-        orderIds: { SS: customer.orderIds}
-      }
-    })
-    const res = await this.dynamoDb.send(command)
+      Item: customer.toJSON()
+    });
+    
+    const res = await this.dynamoDb.send(command);
     if (res) {
       return customer;
     }
@@ -67,10 +66,8 @@ export class CustomerRepository implements ICustomerRepository {
   async deleteCustomer(id: string): Promise<void> {
     const command = new DeleteCommand({
       TableName: CustomerRepository.TABE_NAME,
-      Key: {
-        id: { S: id }
-      }
-    })
+      Key: { id }
+    });
     await this.dynamoDb.send(command);
   }
 
@@ -80,10 +77,10 @@ export class CustomerRepository implements ICustomerRepository {
       AttributeDefinitions: [
         { AttributeName: "id", AttributeType: "S" },
         { AttributeName: "cognitoId", AttributeType: "S" },
-        { AttributeName: "createdAt", AttributeType: "S" }
+        { AttributeName: "createdAt", AttributeType: "S" },
       ],
       KeySchema: [
-        { AttributeName: "id", KeyType: "HASH" }
+        { AttributeName: "id", KeyType: "HASH" },  // Clave primaria
       ],
       GlobalSecondaryIndexes: [
         {
@@ -91,11 +88,12 @@ export class CustomerRepository implements ICustomerRepository {
           KeySchema: [
             { AttributeName: "cognitoId", KeyType: "HASH" },
             { AttributeName: "createdAt", KeyType: "RANGE" }
+            
           ],
           Projection: { ProjectionType: "ALL" }
         }
       ],
-      BillingMode: "PAY_PER_REQUEST",
-     } as CreateTableCommandInput;
+      BillingMode: "PAY_PER_REQUEST"
+    } as CreateTableCommandInput;
   }
 }

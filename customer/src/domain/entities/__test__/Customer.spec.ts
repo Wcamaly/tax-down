@@ -22,7 +22,7 @@ describe('Customer', () => {
       },
       shippingIds: ['shipping1'],
       orderIds: ['order1'],
-      createdAt: new Date()
+      createdAt: new Date().toISOString()
     };
 
     const customer = new Customer(mockCustomerData);
@@ -65,12 +65,12 @@ describe('Customer', () => {
       },
       contact: {
         mainEmail: 'custom@email.com',
-        phones: [],
+        phones: undefined,
         secondaryEmail: 'custom2@email.com' 
       },
       shippingIds: ['shipping1'],
       orderIds: ['order1'],
-      createdAt: new Date()
+      createdAt: new Date().toISOString()
     };
 
     const customer = new Customer(mockCustomerData);
@@ -92,7 +92,7 @@ describe('Customer', () => {
       },
       shippingIds: ['shipping1'],
       orderIds: ['order1'],
-      createdAt: new Date()
+      createdAt: new Date().toISOString()
     };
 
     const customer = Customer.fromJSON(mockCustomerData);
@@ -112,7 +112,7 @@ describe('Customer', () => {
       },
       shippingIds: ['shipping1'],
       orderIds: ['order1'],
-      createdAt: new Date()
+      createdAt: new Date().toISOString()
     };
 
     const customer = new Customer(mockCustomerData);
@@ -142,7 +142,7 @@ describe('Customer', () => {
 
       shippingIds: ['shipping1'],
       orderIds: ['order1'],
-      createdAt: new Date()
+      createdAt: new Date().toISOString()
     };
 
     const customer = new Customer(mockCustomerData);
@@ -171,7 +171,7 @@ describe('Customer', () => {
       },
       shippingIds: ['shipping1'],
       orderIds: ['order1'],
-      createdAt: new Date()
+      createdAt: new Date().toISOString()
     };
 
     const customer = new Customer(mockCustomerData);
@@ -196,7 +196,7 @@ describe('Customer', () => {
       },
       shippingIds: ['shipping1'],
       orderIds: ['order1'],
-      createdAt: new Date()
+      createdAt: new Date().toISOString()
     };
 
     const customer = new Customer(mockCustomerData);

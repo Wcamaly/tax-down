@@ -1,7 +1,5 @@
-import { IsArray, IsDate, IsNotEmpty, IsString, ValidateNested } from "class-validator";
+import { IsArray, IsDate, IsNotEmpty, IsOptional, IsString, ValidateIf, ValidateNested } from "class-validator";
 import { Customer } from "../../../domain/entities/Customer";
-import { Currency, RecordType, SalaryRecord } from "../../../domain/entities/SalaryRecord";
-import { Shipping } from "../../../domain/entities/Shipping";
 import { Contact, IContact, IPhone } from "../../../domain/objects/Contact";
 import { IPerson } from "../../../domain/objects/Person";
 import { Type } from "class-transformer";
@@ -12,12 +10,20 @@ export class PersonDto implements IPerson {
   @IsString()
   lastName!: string;
   @IsDate()
+  @ValidateIf((obj) => obj.birthDate !== null && obj.birthDate !== '')
+  @IsOptional()
   birthDate?: Date | undefined;
   @IsString()
+  @IsOptional()
+  @ValidateIf((obj) => obj.documentType !== null && obj.documentType !== '')
   documentType?: string | undefined;
   @IsString()
+  @IsOptional()
+  @ValidateIf((obj) => obj.documentNumber !== null && obj.documentNumber !== '')
   documentNumber?: string | undefined;
   @IsString()
+  @IsOptional()
+  @ValidateIf((obj) => obj.nationality !== null && obj.nationality !== '')
   nationality?: string | undefined;
 }
 
@@ -33,8 +39,12 @@ export class ContactDto implements IContact {
   mainEmail!: string;
   @ValidateNested()
   @Type(() => PhoneDto)
+  @ValidateIf((obj) => obj.phones !== null)
+  @IsOptional()
   phones?: IPhone[] | undefined;
   @IsString()
+  @IsOptional()
+  @ValidateIf((obj) => obj.secondaryEmail !== null && obj.secondaryEmail !== '')
   secondaryEmail?: string | undefined;
 }
 
@@ -48,10 +58,16 @@ export class CustomerDto {
   person!: IPerson
   @ValidateNested()
   @Type(() => ContactDto)
+  @ValidateIf((obj) => obj.contact !== null)
+  @IsOptional()
   contact?: IContact
   @IsArray({each: true})
+  @ValidateIf((obj) => obj.secondaryEmail !== null )
+  @IsOptional()
   shippingIds?: string[]
   @IsArray({each: true})
+  @ValidateIf((obj) => obj.secondaryEmail !== null)
+  @IsOptional()
   orderIds?: string[]
 }
 

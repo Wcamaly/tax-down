@@ -1,10 +1,11 @@
-import { IsEnum, IsNumber, IsString } from "class-validator";
+import { IsEnum, IsNumber, IsOptional, IsString, ValidateIf } from "class-validator";
 import { Currency, ISalaryRecord, RecordType, SalaryRecord } from "../../../domain/entities/SalaryRecord";
 
 export class SalaryRecordDto implements ISalaryRecord {
   @IsString()
   customerId!: string;
   @IsNumber()
+  @ValidateIf((obj) => obj.birthDate !== null)
   amount?: number | undefined;
   @IsEnum(Currency)
   currency!: Currency;
@@ -13,7 +14,10 @@ export class SalaryRecordDto implements ISalaryRecord {
   @IsString()
   description!: string;
   @IsString()
-  createdAt?: Date | undefined;
+  @ValidateIf((obj) => obj.birthDate !== null )
+  @IsOptional()
+  @IsString()
+  createdAt?: string | undefined;
 }
 
 
@@ -34,7 +38,7 @@ export class SalaryRecordReq {
       dto.currency,
       dto.type,
       dto.description,
-      dto.createdAt?.toISOString()
+      dto.createdAt
     )
   }
 

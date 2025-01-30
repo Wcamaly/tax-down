@@ -6,11 +6,26 @@ export class DynamoDb {
   private readonly client: DynamoDB;
   private readonly instance: DynamoDBDocumentClient;
   constructor() {
-     this.client = new DynamoDB({ region: Environment.AWS_REGION });
-      this.instance = DynamoDBDocument.from(this.client);
+
+    this.client = new DynamoDB({ 
+      region: Environment.AWS_REGION,
+      endpoint: Environment.DYNAMODB_ENDPOINT,
+      credentials: {
+        accessKeyId: Environment.AWS_ACCESS_KEY_ID,
+        secretAccessKey: Environment.AWS_SECRET_ACCESS_KEY,
+      },
+    });
+    this.instance = DynamoDBDocument.from(this.client, {
+      marshallOptions: {
+        removeUndefinedValues: true,
+        convertClassInstanceToMap: true
+      }
+    });
+   
   }
 
   public getInstance(): DynamoDBDocumentClient {
+
     return this.instance;
   }
   
@@ -23,14 +38,15 @@ export class DynamoDb {
       } catch (error: any) {
         if (error.name === "ResourceNotFoundException") {
           console.log(`⚠️ La tabla "${table.TableName}" no existe. Creándola...`);
-          this.client.createTable(table);
+          await this.client.createTable(table);
           console.log(`✅ Tabla "${table.TableName}" creada correctamente.`);
         } else {
-          console.error("❌ Error verificando la tabla:", error);
+          console.error(`❌ Error verificando la tabla: ${table.TableName}`, error);
           throw error;
         }
       }
     }
+
   }
 
 

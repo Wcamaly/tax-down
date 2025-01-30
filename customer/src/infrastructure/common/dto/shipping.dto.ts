@@ -1,10 +1,12 @@
-import { IsBoolean, IsString } from "class-validator";
+import { IsBoolean, IsNumber, IsOptional, IsString, ValidateIf } from "class-validator";
 import { IShipping, Shipping } from "../../../domain/entities/Shipping";
 
 export class ShippingDto implements IShipping {
   @IsString()
   customerId!: string;
   @IsString()
+  @IsOptional()
+  @ValidateIf((obj) => obj.id !== null && obj.id !== undefined)
   id?: string | undefined;
   @IsString()
   addressLine!: string;
@@ -16,8 +18,11 @@ export class ShippingDto implements IShipping {
   country!: string;
   @IsString()
   postalCode!: string;
-  @IsBoolean()
-  isDefault?: boolean;
+  
+  @IsNumber()
+  @ValidateIf((obj) => obj.isDefault !== null)
+  @IsOptional()
+  isDefault?: number;
 }
 
 
@@ -28,8 +33,8 @@ export class ShippingReq {
     public readonly state: string,
     public readonly country: string,
     public readonly zip: string,
-    public readonly isDefault: boolean = false
-
+    public readonly isDefault: boolean = false,
+    public readonly customerId: string
   ){}
 
   static fromDto(dto: ShippingDto): ShippingReq {
@@ -38,7 +43,9 @@ export class ShippingReq {
       dto.city,
       dto.state,
       dto.country,
-      dto.postalCode
+      dto.postalCode,
+      dto.isDefault ? true : false,
+      dto.customerId
     )
   }
 
@@ -49,8 +56,8 @@ export class ShippingReq {
       state: this.state,
       country: this.country,
       postalCode: this.zip,
-      isDefault: false,
-      customerId: ''
+      isDefault: this.isDefault ? 1 : 0,
+      customerId: this.customerId
     })
   }
 }

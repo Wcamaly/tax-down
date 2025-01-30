@@ -11,11 +11,18 @@ export class AddShippingUsecase {
   ){}
 
   async execute(customerId:string,  shipping: ShippingReq): Promise<Shipping> {
-    const customer = await this.customerRepository.getCustomer(customerId);
-    if (!customer) {
+    try{
+      const customer = await this.customerRepository.getCustomer(customerId);
+      if (customer) {
+        const newShipping = shipping.toShipping()
+        newShipping.customerId = customerId;
+        return this.shippingRepository.createShipping(newShipping);
+      }
+      throw new Error("Customer not found");
+    } catch (error) {
+     
+      console.error('Error adding shipping', error)
       throw new Error("Customer not found");
     }
-    return this.shippingRepository.createShipping(shipping.toShipping());
-    
   }
 }

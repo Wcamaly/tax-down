@@ -49,7 +49,7 @@ describe('SalaryRecord', () => {
       currency: Currency.USD,
       type: RecordType.DEPOSIT,
       description: 'Salary payment',
-      createdAt: new Date('2023-01-01')
+      createdAt: new Date('2023-01-01').toISOString()
     };
     const salaryRecord = new SalaryRecord(payload);
     expect(salaryRecord.toJSON()).toEqual(payload);
@@ -63,7 +63,7 @@ describe('SalaryRecord', () => {
       currency: Currency.USD,
       type: RecordType.DEPOSIT,
       description: 'Salary payment',
-      createdAt: new Date('2023-01-01')
+      createdAt: new Date('2023-01-01').toISOString()
     };
     const salaryRecord = SalaryRecord.fromJSON(payload);
     expect(salaryRecord.id).toBe(payload.id);
@@ -72,7 +72,7 @@ describe('SalaryRecord', () => {
     expect(salaryRecord.currency).toBe(payload.currency);
     expect(salaryRecord.type).toBe(payload.type);
     expect(salaryRecord.description).toBe(payload.description);
-    expect(salaryRecord.createdAt).toBe(payload.createdAt);
+    expect(salaryRecord.createdAt).toStrictEqual(new Date(payload.createdAt));
   })
 
   it ('should throw error when creating SalaryRecord with missing required fields', () => {

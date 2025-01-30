@@ -4,18 +4,21 @@ import { ICustomerRepository } from "../../domain/repositories/ICustomer.reposit
 import { ISalaryBalanceRepository } from "../../domain/repositories/ISalaryBalance.repository";
 import { CustomerReq } from "../../infrastructure/common/dto/customer.dto";
 
+
+ const PASSWORD = "Test1234!"
 export class CreateCustomerUsecase {
 
     constructor(
         private readonly customerRepository: ICustomerRepository,
-        private readonly salaryBalanceRepository: ISalaryBalanceRepository,
+        private readonly salaryBalanceRepository: ISalaryBalanceRepository
     ) { }
 
     async execute(request: CustomerReq): Promise<Customer> {
         const customer = request.toCustomer();
         const salaryBalance = new SalaryBalance({ customerId: customer.id, balance: 0, currency: "USD" } as ISalaryBalance);
         await this.customerRepository.createCustomer(customer);
-        await this.salaryBalanceRepository.createSalaryBalance(salaryBalance);
+        const salaryBalanceCreated = await this.salaryBalanceRepository.createSalaryBalance(salaryBalance);
+
         return customer
     }
 }

@@ -1,13 +1,14 @@
-import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { DeleteCommand, DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { ISalaryRecordRepository } from "../../domain/repositories/ISalatyRecord";
 import { SalaryRecord } from "../../domain/entities/SalaryRecord";
 
 import { CreateTableCommandInput, QueryCommand } from "@aws-sdk/client-dynamodb";
+import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 
 export class SalaryRecordRepository implements ISalaryRecordRepository {
   static TABE_NAME = "salary_record";
   static INDEX = {
-    CUSTOMER_INDEX: "CustomerIndex",
+    SALARY_RECORD_BY_CUSTOMER: "SalaryRecordByCustomerIndex",
     TYPE_INDEX: "TypeIndex"
   }
 
@@ -16,24 +17,17 @@ export class SalaryRecordRepository implements ISalaryRecordRepository {
   async getSalaryRecord(customerId: string): Promise<SalaryRecord[]> {
     const command = new QueryCommand({
       TableName: SalaryRecordRepository.TABE_NAME,
-      IndexName: SalaryRecordRepository.INDEX.CUSTOMER_INDEX,
+      IndexName: SalaryRecordRepository.INDEX.SALARY_RECORD_BY_CUSTOMER,
       KeyConditionExpression: "customerId = :customerId",
       ExpressionAttributeValues: {
         ":customerId": { S: customerId }
       },
+      ConsistentRead: false
     })
     const res = await this.dynamoDb.send(command)
     if (res.Items && res.Items.length > 0) {
       return res.Items.map(item => {
-        return SalaryRecord.fromJSON({
-          id: item.id.S,
-          customerId: item.customerId.S,
-          amount: item.amount.N ? parseFloat(item.amount.N) : 0,
-          currency: item.currency.S,
-          type: item.type.S,
-          description: item.description.S,
-          createdAt: item.createdAt.S ? new Date(item.createdAt.S) : undefined
-        })
+        return SalaryRecord.fromJSON(unmarshall(item))
       })
     }
     return [];
@@ -41,19 +35,21 @@ export class SalaryRecordRepository implements ISalaryRecordRepository {
   async createSalaryRecord(salaryRecord: SalaryRecord): Promise<SalaryRecord> {
     const command = new PutCommand({
       TableName: SalaryRecordRepository.TABE_NAME,
-      Item: {
-        id: { S: salaryRecord.id },
-        customerId: { S: salaryRecord.customerId },
-        amount: { N: salaryRecord.amount },
-        currency: { S: salaryRecord.currency },
-        type: { S: salaryRecord.type },
-        description: { S: salaryRecord.description },
-        createdAt: { S: salaryRecord.createdAt?.toISOString() }
-      }
+      Item: salaryRecord.toJSON()
     })
-
     await this.dynamoDb.send(command)
     return salaryRecord;
+  }
+
+  async deleteSalaryRecord(customerId: string): Promise<void> {
+     const salaryRecords = await this.getSalaryRecord(customerId); // TODO : I need to paginate this
+     for (const salaryRecord of salaryRecords) {
+      const command = new DeleteCommand({
+        TableName: SalaryRecordRepository.TABE_NAME,
+        Key: { id: salaryRecord.id }
+      });
+      await this.dynamoDb.send(command);
+     }
   }
 
   static getCustomerDefinition() : CreateTableCommandInput {
@@ -70,7 +66,7 @@ export class SalaryRecordRepository implements ISalaryRecordRepository {
       ],
       GlobalSecondaryIndexes: [
         {
-          IndexName: SalaryRecordRepository.INDEX.CUSTOMER_INDEX,
+          IndexName: SalaryRecordRepository.INDEX.SALARY_RECORD_BY_CUSTOMER,
           KeySchema: [
             { AttributeName: "customerId", KeyType: "HASH" },
             { AttributeName: "createdAt", KeyType: "RANGE" }

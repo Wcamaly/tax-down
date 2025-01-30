@@ -6,9 +6,9 @@ export interface ISalaryBalance {
   customerId: string;
   balance: number;
   currency: string;
-  lastUpdated: Date;
+  lastUpdated: string;
   lastRecordId?: string;
-  createdAt?: Date;
+  createdAt?: string;
 }
 
 export class SalaryBalance extends EntityBase<SalaryBalance, ISalaryBalance> {
@@ -25,9 +25,9 @@ export class SalaryBalance extends EntityBase<SalaryBalance, ISalaryBalance> {
     this.customerId = payload.customerId;
     this.balance = payload.balance;
     this.currency = payload.currency;
-    this.lastUpdated = payload.lastUpdated;
+    this.lastUpdated = payload.lastUpdated ? new Date(payload.lastUpdated) : new Date();
     this.lastRecordId = payload.lastRecordId;
-    this.createdAt = payload.createdAt ?? new Date();
+    this.createdAt = payload.createdAt ? new Date(payload.createdAt) : new Date();
   }
 
   updateBalance(salaryRecord: SalaryRecord): SalaryBalance {
@@ -47,9 +47,9 @@ export class SalaryBalance extends EntityBase<SalaryBalance, ISalaryBalance> {
       customerId: this.customerId,
       balance: this.balance,
       currency: this.currency,
-      lastUpdated: this.lastUpdated,
+      lastUpdated: this.lastUpdated?.toISOString() || new Date().toISOString(),
       lastRecordId: this.lastRecordId,
-      createdAt: this.createdAt
+      createdAt: this.createdAt?.toISOString() || new Date().toISOString()
     }
   }
 }

@@ -12,9 +12,9 @@ describe('SalaryBalance', () => {
       customerId: 'cust-123',
       balance: 1000,
       currency: 'USD',
-      lastUpdated: new Date('2023-01-01'),
+      lastUpdated: new Date('2023-01-01').toISOString(),
       lastRecordId: 'rec-123',
-      createdAt: new Date('2023-01-01')
+      createdAt: new Date('2023-01-01').toISOString()
     };
 
     const salaryBalance = new SalaryBalance(payload);
@@ -23,9 +23,9 @@ describe('SalaryBalance', () => {
     expect(salaryBalance.customerId).toBe(payload.customerId);
     expect(salaryBalance.balance).toBe(payload.balance);
     expect(salaryBalance.currency).toBe(payload.currency);
-    expect(salaryBalance.lastUpdated).toBe(payload.lastUpdated);
+    expect(salaryBalance.lastUpdated).toStrictEqual(new Date(payload.lastUpdated));
     expect(salaryBalance.lastRecordId).toBe(payload.lastRecordId);
-    expect(salaryBalance.createdAt).toBe(payload.createdAt);
+    expect(salaryBalance.createdAt).toStrictEqual(new Date(payload.createdAt));
   });
 
   it('should toJSON return the salary balance data', () => {
@@ -34,9 +34,9 @@ describe('SalaryBalance', () => {
       customerId: 'cust-123',
       balance: 1000,
       currency: 'USD',
-      lastUpdated: new Date('2023-01-01'),
+      lastUpdated: new Date('2023-01-01').toISOString(),
       lastRecordId: 'rec-123',
-      createdAt: new Date('2023-01-01')
+      createdAt: new Date('2023-01-01').toISOString()
     };
 
     const salaryBalance = new SalaryBalance(payload);
@@ -50,9 +50,9 @@ describe('SalaryBalance', () => {
       customerId: 'cust-123',
       balance: 1000,
       currency: 'USD',
-      lastUpdated: new Date('2023-01-01'),
+      lastUpdated: new Date('2023-01-01').toISOString(),
       lastRecordId: 'rec-123',
-      createdAt: new Date('2023-01-01')
+      createdAt: new Date('2023-01-01').toISOString()
     };
 
     const salaryBalance = SalaryBalance.fromJSON(payload);
@@ -61,9 +61,9 @@ describe('SalaryBalance', () => {
     expect(salaryBalance.customerId).toBe(payload.customerId);
     expect(salaryBalance.balance).toBe(payload.balance);
     expect(salaryBalance.currency).toBe(payload.currency);
-    expect(salaryBalance.lastUpdated).toBe(payload.lastUpdated);
+    expect(salaryBalance.lastUpdated).toStrictEqual(new Date(payload.lastUpdated));
     expect(salaryBalance.lastRecordId).toBe(payload.lastRecordId);
-    expect(salaryBalance.createdAt).toBe(payload.createdAt);
+    expect(salaryBalance.createdAt).toStrictEqual(new Date(payload.createdAt));
     
   })
 
@@ -73,9 +73,9 @@ describe('SalaryBalance', () => {
       customerId: 'cust-123',
       balance: 1000,
       currency: 'USD',
-      lastUpdated: new Date('2023-01-01'),
+      lastUpdated: new Date('2023-01-01').toISOString(),
       lastRecordId: 'rec-123',
-      createdAt: new Date('2023-01-01')
+      createdAt: new Date('2023-01-01').toISOString()
     };
 
     const salaryBalance = new SalaryBalance(payload);
@@ -87,13 +87,13 @@ describe('SalaryBalance', () => {
       currency: Currency.USD,
       type: RecordType.DEPOSIT,
       description: 'Deposit',
-      createdAt: new Date('2023-01-01')
+      createdAt: new Date('2023-01-01').toISOString()
     };
 
     salaryBalance.updateBalance(new SalaryRecord(salaryRecord));
 
     expect(salaryBalance.balance).toBe(1100);
-    expect(salaryBalance.lastUpdated).not.toBe(payload.lastUpdated);
+    expect(salaryBalance.lastUpdated.getTime()).toBeGreaterThanOrEqual(new Date(payload.lastUpdated).getTime());
     expect(salaryBalance.lastRecordId).toBe(salaryRecord.id);
   })
 
@@ -103,9 +103,9 @@ describe('SalaryBalance', () => {
       customerId: 'cust-123',
       balance: 1000,
       currency: 'USD',
-      lastUpdated: new Date('2023-01-01'),
+      lastUpdated: new Date('2023-01-01').toISOString(),
       lastRecordId: 'rec-123',
-      createdAt: new Date('2023-01-01')
+      createdAt: new Date('2023-01-01').toISOString()
     };
     const salatyBalance = new SalaryBalance(payload);
 
@@ -116,13 +116,13 @@ describe('SalaryBalance', () => {
       currency: Currency.USD,
       type: RecordType.WITHDRAWAL,
       description: 'Withdrawal',
-      createdAt: new Date('2023-01-01')
+      createdAt: new Date('2023-01-01').toISOString()
     };
 
     salatyBalance.updateBalance(new SalaryRecord(salaryRecord));
 
     expect(salatyBalance.balance).toBe(900);
-    expect(salatyBalance.lastUpdated).not.toBe(payload.lastUpdated);
+    expect(salatyBalance.lastUpdated.getTime()).toBeGreaterThanOrEqual(new Date(payload.lastUpdated).getTime()); 
     expect(salatyBalance.lastRecordId).toBe(salaryRecord.id);
   })
 

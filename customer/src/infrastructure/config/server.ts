@@ -1,6 +1,8 @@
 import fastify, { FastifyInstance } from "fastify";
 import { Environment } from "./enviroments";
 import { Route } from "../../domain/objects/Route";
+import { responseMiddleware } from "../common/middlewarer/response";
+import { errorHandlerMiddleware } from "../common/middlewarer/error";
 
 export class Server {
   private _server: FastifyInstance;
@@ -8,6 +10,14 @@ export class Server {
   constructor() {
     this._server = fastify({
       logger: true,
+      ajv: {
+        customOptions: {
+          removeAdditional: false,
+          useDefaults: true,
+          coerceTypes: true,
+          allErrors: true,
+        }
+      }
     });
   }
 
@@ -15,31 +25,20 @@ export class Server {
     return this._server;
   }
 
-  public async registerRoutes(routes: Route[]): Promise<void> {
-    routes.forEach((route) => {
-      switch (route.method) {
-        case "GET":
-          this._server.get(route.path, route.handler);
-          break;
-        case "POST":
-          this._server.post(route.path, route.handler);
-          break;
-        case "PUT":
-          this._server.put(route.path, route.handler);
-          break;
-        case "DELETE":
-          this._server.delete(route.path, route.handler);
-          break;
-        case "PATCH":
-          this._server.patch(route.path, route.handler);
-          break;
-        case "OPTIONS":
-          this._server.options(route.path, route.handler);
-          break;
-        default:
-          this._server.all(route.path, route.handler);
-      }
-    });
+  public async registerMiddlewares(): Promise<void> {
+    try{
+      console.log('⏳ Registrando middlewares...');
+      responseMiddleware(this._server);
+      this._server.addHook('onRequest', (request, reply, done) => {
+        console.log('🎯 Nueva petición recibida');
+        done();
+      });
+      errorHandlerMiddleware(this._server);
+      console.log('✅ Middlewares registrados correctamente');
+    } catch (error) {
+      console.error('🔥 Error al registrar middlewares:', error);
+      throw error;
+    }
   }
 
 
