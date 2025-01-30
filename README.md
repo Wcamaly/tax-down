@@ -1,6 +1,6 @@
 # Tax-Down Service
 
-A microservice-based application for managing customer tax information, built with Node.js, TypeScript, and AWS services.
+A microservice-based application for managing customer information, built with Node.js, TypeScript, and AWS services.
 
 ## 🏗️ Architecture
 
