@@ -20,8 +20,6 @@ export class AddShippingUsecase {
       }
       throw new Error("Customer not found");
     } catch (error) {
-     
-      console.error('Error adding shipping', error)
       throw new Error("Customer not found");
     }
   }

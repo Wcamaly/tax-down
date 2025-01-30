@@ -27,8 +27,8 @@ This service follows Clean Architecture principles and is built using:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/your-repo/tax-daown.git
-cd tax-daown
+git clone [https://github.com/your-repo/tax-down.git](https://github.com/Wcamaly/tax-down.git)
+cd tax-down
 ```
 
 2. Build and run the containers:
@@ -63,6 +63,7 @@ pnpm dev
 ### Running Unit Tests
 
 ```bash
+cd customer
 # Run all tests
 pnpm test
 ```
@@ -114,5 +115,8 @@ src/
 - `GET /salary-record/:customerId` - Get customer'\''s salary records
 
 
+### Video Example
+
+![Video Example](doc/example.mov)
 
 

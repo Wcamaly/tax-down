@@ -21,7 +21,15 @@ describe('AddShippingUsecase', () => {
       })
     };
     const usecase = new AddShippingUsecase(mockCustomerRepo as any, mockShippingRepo as any);
-    const shippingReq = new ShippingReq('123 Main St', 'Test City', 'TS', 'Test Country', '12345');
+    const shippingReq = new ShippingReq(
+      '123 Main St', 
+      'Test City', 
+      'TS', 
+      'Test Country', 
+      '12345', 
+      false,
+      'customer-1'
+    );
     const result = await usecase.execute('customer-1', shippingReq);
     expect(mockCustomerRepo.getCustomer).toHaveBeenCalledWith('customer-1');
     expect(mockShippingRepo.createShipping).toHaveBeenCalled();
@@ -37,7 +45,15 @@ describe('AddShippingUsecase', () => {
       createShipping: jest.fn()
     };
     const usecase = new AddShippingUsecase(mockCustomerRepo as any, mockShippingRepo as any);
-    const shippingReq = new ShippingReq('123 Main St', 'Test City', 'TS', 'Test Country', '12345');
+    const shippingReq = new ShippingReq(
+      '123 Main St', 
+      'Test City', 
+      'TS', 
+      'Test Country', 
+      '12345', 
+      false,
+      'customer-1'
+    );
     await expect(usecase.execute('invalid-id', shippingReq))
       .rejects
       .toThrow('Customer not found');
